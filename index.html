@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>أزياء الهوانم — المتجر</title>
+<style>
+  :root{
+    --accent:#ff6f61;
+    --accent-dark:#ff4c3b;
+    --bg:#fff8f5;
+    --card:#ffffff;
+    --muted:#666;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+    background:var(--bg);
+    color:#222;
+    direction:rtl;
+  }
+
+  /* Header */
+  header{
+    background:linear-gradient(90deg,var(--accent),#ff8a75);
+    color:#fff;
+    padding:18px 16px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:700;
+    font-size:1.35rem;
+  }
+  .brand .logo{
+    width:46px;height:46px;border-radius:10px;
+    background:#fff3f1;display:flex;align-items:center;justify-content:center;color:var(--accent);
+    font-weight:800;font-size:1.2rem;
+  }
+
+  /* Search & controls */
+  .controls{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex:1;
+    justify-content:center;
+    min-width:280px;
+  }
+  .search {
+    display:flex;align-items:center;background:#fff;padding:6px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.06);
+    width:100%;max-width:560px;
+  }
+  .search input{
+    border:0;outline:0;padding:8px 10px;font-size:0.95rem;width:100%;
+    background:transparent;
+  }
+  .search button{background:var(--accent);border:0;color:#fff;padding:8px 12px;border-radius:6px;cursor:pointer}
+  .actions{display:flex;gap:8px;align-items:center}
+  .cart-btn{
+    background:transparent;border:2px solid rgba(255,255,255,0.25);color:#fff;padding:8px 12px;border-radius:40px;cursor:pointer;
+  }
+
+  /* Layout */
+  main{padding:20px 16px 80px}
+  .top-row{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+  .sidebar{
+    width:260px;min-width:200px;
+    background:var(--card);padding:14px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.06);
+    height:max-content;
+  }
+  .sidebar h4{margin:0 0 10px 0}
+  .sidebar label{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:0.95rem}
+  .main-area{flex:1}
+
+  /* product grid */
+  .products{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:18px;
+    margin-top:10px;
+  }
+  .card{
+    background:var(--card);border-radius:12px;padding:10px;text-align:center;
+    box-shadow:0 6px 18px rgba(0,0,0,0.06);transition:transform .18s,box-shadow .18s;overflow:hidden;
+  }
+  .card:hover{transform:translateY(-6px);box-shadow:0 12px 28px rgba(0,0,0,0.12)}
+  .card img{width:100%;height:260px;object-fit:cover;border-radius:8px}
+  .card h3{margin:10px 0 6px;font-size:1.05rem}
+  .card p{margin:0;color:var(--muted);font-size:0.9rem}
+  .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px}
+  .price{font-weight:700}
+  .card button{background:var(--accent);border:0;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  .card button:hover{background:var(--accent-dark)}
+
+  /* cart drawer */
+  .drawer{
+    position:fixed;left:20px;top:20px;z-index:1200;
+  }
+  .drawer-panel{
+    width:340px;max-height:80vh;overflow:auto;background:#fff;border-radius:12px;border:2px solid var(--accent);
+    padding:12px;box-shadow:0 12px 30px rgba(0,0,0,0.12);display:none;
+  }
+  .drawer-panel.visible{display:block}
+  .cart-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #eee}
+  .cart-item img{width:64px;height:64px;object-fit:cover;border-radius:8px}
+  .qty-controls{display:flex;gap:6px;align-items:center}
+  .small-btn{background:#f3f3f3;border:0;padding:6px 8px;border-radius:6px;cursor:pointer}
+
+  .total-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-weight:700}
+
+  /* modal product detail */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:1300}
+  .overlay.visible{display:flex}
+  .modal{background:#fff;border-radius:12px;padding:16px;max-width:920px;width:95%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .modal img{width:100%;height:420px;object-fit:cover;border-radius:8px}
+  .modal h2{margin:0 0 8px}
+  .modal p{color:var(--muted)}
+  .modal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+  .close-btn{background:transparent;border:0;font-size:1.2rem;cursor:pointer;color:var(--muted)}
+
+  /* footer */
+  footer{background:var(--accent);color:#fff;padding:18px;text-align:center;margin-top:28px}
+
+  /* responsive adjustments */
+  @media(max-width:920px){
+    .modal{grid-template-columns:1fr;max-height:90vh;overflow:auto}
+    .sidebar{display:none}
+    .top-row{gap:12px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">أ</div>
+    <div>
+      أزياء الهوانم<br><small style="opacity:.9">متجر إلكتروني للملابس النسائية</small>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search" role="search" aria-label="بحث">
+      <input id="searchInput" placeholder="ابحث عن منتج أو لون أو نوع..." oninput="debouncedSearch()" />
+      <button onclick="applySearch()">بحث</button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="cart-btn" onclick="toggleCart()">🛒 سلة (<span id="cartCount">0</span>)</button>
+    <button class="cart-btn" onclick="openContact()">اتصل بنا</button>
+  </div>
+</header>
+
+<main>
+  <div class="top-row">
+    <aside class="sidebar" aria-label="خيارات التصفية">
+      <h4>تصفية وفرز</h4>
+
+      <label>
+        <input type="radio" name="sort" value="popular" checked onchange="applyFilters()" /> الأحدث
+      </label>
+      <label>
+        <input type="radio" name="sort" value="price-asc" onchange="applyFilters()" /> السعر: من الأقل
+      </label>
+      <label>
+        <input type="radio" name="sort" value="price-desc" onchange="applyFilters()" /> السعر: من الأعلى
+      </label>
+
+      <hr />
+
+      <h4>الفئات</h4>
+      <label><input type="checkbox" value="فستان" onchange="applyFilters()" checked /> فساتين</label>
+      <label><input type="checkbox" value="بلوزة" onchange="applyFilters()" checked /> بلوزات</label>
+      <label><input type="checkbox" value="تنورة" onchange="applyFilters()" checked /> تنانير</label>
+      <label><input type="checkbox" value="طقم" onchange="applyFilters()" checked /> أطقم</label>
+
+      <hr />
+
+      <h4>سعر (₪)</h4>
+      <label>من <input id="minPrice" type="number" value="0" min="0" style="width:90px;margin-left:6px" onchange="applyFilters()" /></label>
+      <label>إلى <input id="maxPrice" type="number" value="1000" min="0" style="width:90px;margin-left:6px" onchange="applyFilters()" /></label>
+
+      <hr />
+
+      <button style="background:var(--accent);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer" onclick="resetFilters()">إعادة</button>
+    </aside>
+
+    <section class="main-area">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <h2 id="resultsTitle">أحدث المنتجات</h2>
+        <div style="color:var(--muted)">عرض <span id="resultsCount">0</span> منتج</div>
+      </div>
+
+      <div class="products" id="productsGrid" aria-live="polite"></div>
+    </section>
+  </div>
+</main>
+
+<!-- cart drawer -->
+<div class="drawer">
+  <div id="cartPanel" class="drawer-panel" aria-hidden="true">
+    <h4>عربة التسوق</h4>
+    <div id="cartList"></div>
+    <div class="total-row">
+      <div>الإجمالي</div>
+      <div id="cartTotal">0 ₪</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button style="flex:1;background:var(--accent);color:#fff;border:0;padding:10px;border-radius:8px;cursor:pointer" onclick="checkout()">إتمام الطلب</button>
+      <button style="flex:1;background:#f3f3f3;border:0;padding:10px;border-radius:8px;cursor:pointer" onclick="clearCart()">تفريغ العربة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detail -->
+<div id="overlay" class="overlay" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div>
+      <img id="modalImg" src="" alt="تفاصيل المنتج" />
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 id="modalTitle">اسم المنتج</h2>
+        <button class="close-btn" onclick="closeModal()">✖</button>
+      </div>
+      <p id="modalDesc">وصف المنتج...</p>
+      <div class="meta">
+        <div><strong id="modalPrice">0 ₪</strong></div>
+        <div>
+          <label>الكمية: <input id="modalQty" type="number" value="1" min="1" style="width:70px;text-align:center" /></label>
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button style="background:var(--accent);color:#fff;border:0;padding:10px;border-radius:8px;cursor:pointer" onclick="modalAddToCart()">أضف للعربة</button>
+        <button style="background:#f3f3f3;border:0;padding:10px;border-radius:8px;cursor:pointer" onclick="closeModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contact quick modal -->
+<div id="contactModal" class="overlay" aria-hidden="true">
+  <div class="modal" style="max-width:640px">
+    <div style="grid-column:1/-1">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>اتصل بنا</h2>
+        <button class="close-btn" onclick="closeContact()">✖</button>
+      </div>
+      <p style="color:var(--muted)">اترك رسالتك وسأعود لك قريبًا. (نموذج تجريبي — غير مرتبط بخادم)</p>
+      <form onsubmit="event.preventDefault();alert('تم إرسال الرسالة (تجريبي)');closeContact();">
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <input required placeholder="الاسم" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd" />
+          <input required type="email" placeholder="البريد الإلكتروني" style="flex:1;padding:8px;border-radius:8px;border:1px solid #ddd" />
+        </div>
+        <textarea required placeholder="نص الرسالة" style="width:100%;min-height:120px;margin-top:8px;padding:8px;border-radius:8px;border:1px solid #ddd"></textarea>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+          <button style="background:var(--accent);color:#fff;border:0;padding:10px;border-radius:8px;cursor:pointer">إرسال</button>
+          <button type="button" style="background:#f3f3f3;border:0;padding:10px;border-radius:8px;cursor:pointer" onclick="closeContact()">إلغاء</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<footer>
+  جميع الحقوق محفوظة © أزياء الهوانم — 2025
+</footer>
+
+<script>
+/* ===== بيانات المنتجات (يمكنك تغييرها أو إضافة عناصر) =====
+   img: روابط صور عامة — يمكنك استبدالها بروابطك أو صور محلية
+*/
+const PRODUCTS = [
+  { id:1, name:"فستان صيفي أزرق", price:120, type:"فستان",
+    img:"https://i.imgur.com/4XzN6J3.jpg",
+    desc:"فستان خفيف ومريح مناسب للصيف—قماش تنفس عالي وجودة ممتازة." },
+  { id:2, name:"بلوزة حريرية وردية", price:85, type:"بلوزة",
+    img:"https://i.imgur.com/y2pS1hX.jpg",
+    desc:"بلوزة ناعمة لمناسباتك الخفيفة — خامة حريرية مريحة." },
+  { id:3, name:"تنورة طويلة بيج", price:100, type:"تنورة",
+    img:"https://i.imgur.com/Vshj2Yo.jpg",
+    desc:"تنورة كلاسيكية تصلح للعمل والنزهات." },
+  { id:4, name:"فستان سهرة أسود", price:250, type:"فستان",
+    img:"https://i.imgur.com/Y1r7z4v.jpg",
+    desc:"فستان سهرة أنيق لمناسباتك الخاصة." },
+  { id:5, name:"بلوزة صيفية", price:90, type:"بلوزة",
+    img:"https://i.imgur.com/k7uK6Sj.jpg",
+    desc:"بلوزة خفيفة للأيام الحارة." },
+  { id:6, name:"طقم رسمي نسائي", price:300, type:"طقم",
+    img:"https://i.imgur.com/U4RZfH7.jpg",
+    desc:"طقم أنيق للعمل مع لمسة عصرية." },
+  { id:7, name:"فستان وردي أنثوي", price:200, type:"فستان",
+    img:"https://i.imgur.com/mXxS87Q.jpg",
+    desc:"فستان رسمي بحياكة ممتازة ودرزات دقيقة." },
+  { id:8, name:"تنورة قصيرة سوداء", price:110, type:"تنورة",
+    img:"https://i.imgur.com/1Kb7K3p.jpg",
+    desc:"تنورة عصرية تناسب الخروج والسهرات." },
+  { id:9, name:"بلوزة شيفون أزرق", price:95, type:"بلوزة",
+    img:"https://i.imgur.com/0LhP4dz.jpg",
+    desc:"بلوزة شيفون خفيفة مع تفاصيل ناعمة." },
+  { id:10, name:"طقم كاجوال نسائي", price:220, type:"طقم",
+    img:"https://i.imgur.com/8wZ2fVd.jpg",
+    desc:"طقم يومي مريح وأنيق للراحة والشكل." }
+];
+
+let state = {
+  products: [...PRODUCTS],
+  cart: [], // {id, name, price, qty, img}
+  filters:{
+    q:"",
+    cats: new Set(["فستان","بلوزة","تنورة","طقم"]),
+    minPrice:0, maxPrice:1000,
+    sort:"popular"
+  }
+};
+
+/* ===== رندر المنتجات ===== */
+const grid = document.getElementById('productsGrid');
+const resultsTitle = document.getElementById('resultsTitle');
+const resultsCount = document.getElementById('resultsCount');
+
+function renderProducts(list){
+  grid.innerHTML = "";
+  if(list.length===0){
+    resultsTitle.textContent="لا توجد نتائج";
+    resultsCount.textContent=0;
+    grid.innerHTML = `<div style="padding:30px;background:#fff;border-radius:10px;text-align:center;color:var(--muted)">حاول تغيير الفلاتر أو البحث</div>`;
+    return;
+  }
+  resultsTitle.textContent = "المنتجات";
+  resultsCount.textContent = list.length;
+  list.forEach(p=>{
+    const el = document.createElement('div');
+    el.className='card';
+    el.innerHTML = `
+      <img src="${p.img}" alt="${escapeHtml(p.name)}" loading="lazy" />
+      <h3>${escapeHtml(p.name)}</h3>
+      <p>${escapeHtml(p.type)}</p>
+      <div class="price-row">
+        <div class="price">${p.price} ₪</div>
+        <div><button onclick="openDetail(${p.id})">عرض</button></div>
+      </div>
+    `;
+    grid.appendChild(el);
+  });
+}
+
+/* ===== فلترة/بحث/فرز ===== */
+function applyFilters(){
+  // الفئات
+  const checkboxes = document.querySelectorAll('.sidebar input[type="checkbox"]');
+  const cats = new Set();
+  checkboxes.forEach(ch=>{
+    if(ch.checked) cats.add(ch.value);
+  });
+  state.filters.cats = cats;
+
+  // sort
+  const sort = document.querySelector('.sidebar input[name="sort"]:checked').value;
+  state.filters.sort = sort;
+
+  // price
+  const min = Number(document.getElementById('minPrice').value || 0);
+  const max = Number(document.getElementById('maxPrice').value || 100000);
+  state.filters.minPrice = min;
+  state.filters.maxPrice = max;
+
+  filterAndRender();
+}
+
+function resetFilters(){
+  document.getElementById('minPrice').value = 0;
+  document.getElementById('maxPrice').value = 1000;
+  document.querySelectorAll('.sidebar input[type="checkbox"]').forEach(ch=>ch.checked=true);
+  document.querySelector('.sidebar input[value="popular"]').checked = true;
+  document.getElementById('searchInput').value = "";
+  state.filters.q = "";
+  applyFilters();
+}
+
+function filterAndRender(){
+  let out = PRODUCTS.filter(p=>{
+    // category
+    if(!state.filters.cats.has(p.type)) return false;
+    // price range
+    if(p.price < state.filters.minPrice || p.price > state.filters.maxPrice) return false;
+    // search
+    const q = state.filters.q.trim().toLowerCase();
+    if(q){
+      const hay = (p.name + " " + p.type + " " + p.desc).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // sort
+  if(state.filters.sort === "price-asc") out.sort((a,b)=>a.price-b.price);
+  else if(state.filters.sort === "price-desc") out.sort((a,b)=>b.price-a.price);
+  else out = out; // popular/الأحدث — keep original order
+
+  renderProducts(out);
+}
+
+/* ===== بحث سريع مع تأخير صغير ===== */
+let searchTimer = null;
+function debouncedSearch(){
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ applySearch(); }, 380);
+}
+function applySearch(){
+  state.filters.q = document.getElementById('searchInput').value || "";
+  filterAndRender();
+}
+
+/* ===== تفاصيل المنتج (مودال) ===== */
+const overlay = document.getElementById('overlay');
+function openDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalTitle').textContent = p.name;
+  document.getElementById('modalDesc').textContent = p.desc;
+  document.getElementById('modalPrice').textContent = p.price + " ₪";
+  document.getElementById('modalQty').value = 1;
+  overlay.classList.add('visible');
+  overlay.setAttribute('aria-hidden','false');
+  // save current product id for modal add
+  overlay.dataset.productId = id;
+}
+function closeModal(){ overlay.classList.remove('visible'); overlay.setAttribute('aria-hidden','true'); overlay.dataset.productId=""; }
+function modalAddToCart(){
+  const id = Number(overlay.dataset.productId);
+  const qty = Number(document.getElementById('modalQty').value) || 1;
+  if(!id) return;
+  const p = PRODUCTS.find(x=>x.id===id);
+  addToCart(p, qty);
+  closeModal();
+}
+
+/* ===== إدارة العربة ===== */
+const cartPanel = document.getElementById('cartPanel');
+function toggleCart(){
+  cartPanel.classList.toggle('visible');
+  cartPanel.setAttribute('aria-hidden', cartPanel.classList.contains('visible') ? 'false' : 'true');
+}
+function updateCartUI(){
+  const list = document.getElementById('cartList');
+  list.innerHTML = "";
+  let total = 0;
+  state.cart.forEach(item=>{
+    const row = document.createElement('div');
+    row.className = 'cart-item';
+    row.innerHTML = `
+      <img src="${item.img}" alt="${escapeHtml(item.name)}">
+      <div style="flex:1">
+        <div style="font-weight:700">${escapeHtml(item.name)}</div>
+        <div style="color:var(--muted);font-size:0.9rem">${item.price} ₪</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="qty-controls">
+          <button class="small-btn" onclick="changeQty(${item.id}, -1)">-</button>
+          <div style="min-width:28px;text-align:center">${item.qty}</div>
+          <button class="small-btn" onclick="changeQty(${item.id}, 1)">+</button>
+        </div>
+        <button class="small-btn" style="background:#ffecec;color:#b33;border-radius:6px" onclick="removeFromCart(${item.id})">حذف</button>
+      </div>
+    `;
+    list.appendChild(row);
+    total += item.price * item.qty;
+  });
+  document.getElementById('cartTotal').textContent = total + " ₪";
+  document.getElementById('cartCount').textContent = state.cart.reduce((s,i)=>s+i.qty,0);
+  // small accessibility text
+  cartPanel.querySelectorAll('[aria-live]').forEach(n=>n.textContent='');
+}
+
+function addToCart(product, qty=1){
+  const existing = state.cart.find(i=>i.id===product.id);
+  if(existing) existing.qty += qty;
+  else state.cart.push({ id:product.id, name:product.name, price:product.price, qty:qty, img:product.img });
+  updateCartUI();
+  cartPanel.classList.add('visible');
+}
+
+/* helpers for buttons in cards (we pass id) */
+function openDetailById(id){ openDetail(id); }
+function addToCartById(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(p) addToCart(p,1);
+}
+
+function changeQty(id, delta){
+  const it = state.cart.find(i=>i.id===id);
+  if(!it) return;
+  it.qty += delta;
+  if(it.qty <= 0) {
+    state.cart = state.cart.filter(i=>i.id!==id);
+  }
+  updateCartUI();
+}
+function removeFromCart(id){ state.cart = state.cart.filter(i=>i.id!==id); updateCartUI(); }
+function clearCart(){ if(confirm('هل تريد تفريغ العربة؟')){ state.cart = []; updateCartUI(); } }
+
+/* checkout (محاكاة) */
+function checkout(){
+  if(state.cart.length===0){ alert('العربة فارغة'); return; }
+  // هنا يمكنك ربط بوابة دفع — حالياً محاكاة
+  const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const names = state.cart.map(i=>`${i.name} x${i.qty}`).join(", ");
+  alert(`محاكاة إتمام الطلب\nالمنتجات: ${names}\nالإجمالي: ${total} ₪\n(هذه محاكاة — لربط الدفع تحتاج خادم وبوابة دفع)`);
+  // بعد الإتمام نرّفق تفريغ العربة
+  state.cart = [];
+  updateCartUI();
+}
+
+/* contact modal */
+function openContact(){ document.getElementById('contactModal').classList.add('visible'); document.getElementById('contactModal').setAttribute('aria-hidden','false') }
+function closeContact(){ document.getElementById('contactModal').classList.remove('visible'); document.getElementById('contactModal').setAttribute('aria-hidden','true') }
+
+/* utility and init */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function init(){
+  renderProducts(PRODUCTS);
+  applyFilters(); // to sync UI
+  updateCartUI();
+}
+init();
+
+/* small keyboard accessibility */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    closeModal();
+    closeContact();
+  }
+});
+
+/* expose small helpers for inline onclick */
+window.openDetail = openDetail;
+window.addToCart = addToCart;
+window.clearCart = clearCart;
+window.changeQty = changeQty;
+window.removeFromCart = removeFromCart;
+window.checkout = checkout;
+window.openContact = openContact;
+window.closeContact = closeContact;
+window.applyFilters = applyFilters;
+window.resetFilters = resetFilters;
+window.applySearch = applySearch;
+</script>
